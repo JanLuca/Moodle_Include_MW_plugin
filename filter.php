@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for including pages from Wikiversity
+ * Class for including pages from MediaWiki
  *
  * @package    filter
- * @subpackage wikiversity
+ * @subpackage mediawiki
  * @copyright  2013 by Jan Luca Naumann
  * @author     Jan Luca Naumann <jan@jans-seite.de>
  * @license    CC-BY-SA 3.0 or later
  */
 
-class filter_wikiversity extends moodle_text_filter {
+class filter_mediawiki extends moodle_text_filter {
 	public function filter($text, array $options = array()) {
 		global $PAGE;
 

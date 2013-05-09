@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Include Wikiversity-pages into Moodle
+ * Include MediaWiki-pages into Moodle
  *
  * @package    filter
- * @subpackage wikiversity
+ * @subpackage mediawiki
  * @copyright  2013 by Jan Luca Naumann
  * @author     Jan Luca Naumann <jan@jans-seite.de>
  * @license    CC-BY-SA 3.0 or later
@@ -27,8 +27,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2013041800;
-$plugin->component = 'filter_wikiversity';
-$plugin->release   = '1.0 (Build: 2013041800)'; 
+$plugin->component = 'filter_mediawiki';
+$plugin->release   = '1.0 Alpha (Build: xxxxxxxxxx)'; 
 $plugin->requires  = 2012062500;
 $plugin->cron      = 0;
-$plugin->maturity  = MATURITY_STABLE;
+$plugin->maturity  = MATURITY_ALPHA;
