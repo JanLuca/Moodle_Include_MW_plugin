@@ -13,6 +13,7 @@
         <FIELD NAME="lang" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma-seperated lists of possible languages of a wiki family. Can be disabled (value = NULL) when the entry is no wiki family."/>
         <FIELD NAME="api" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="URL to the Wiki api. Use $lang when more than one language is described"/>
         <FIELD NAME="page_url" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="URL with the wiki pages. Use $1 to show the place of the page name and $lang for the language.  Example: https://$lang.wikiversity.org/wiki/$1"/>
+        <FIELD NAME="type" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Type of the wiki."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
