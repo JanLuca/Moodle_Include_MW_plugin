@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Include MediaWiki-pages into Moodle
+ * MediaWiki-filter post db-install hook
  *
  * @package    filter
  * @subpackage mediawiki
@@ -24,11 +24,22 @@
  * @license    CC-BY-SA 3.0 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once( __DIR__ . '/wiki_list.php)';
 
-$plugin->version   = 2013050900;
-$plugin->component = 'filter_mediawiki';
-$plugin->release   = '1.0 Alpha (Build: xxxxxxxxxx)';
-$plugin->requires  = 2012062500;
-$plugin->cron      = 0;
-$plugin->maturity  = MATURITY_ALPHA;
+function xmldb_filter_activitynames_install() {
+    global $DB, $filter_mediawiki_wiki_list;
+
+	foreach( $filter_mediawiki_wiki_list as $wiki ) {
+		$record = new stdClass();
+		$record->description = $wiki['short'];
+		$record->short_name = $wiki['short'];
+		$record->long_name = $wiki['long'];
+		$record->lang = $wiki['lang'];
+		$record->api = $wiki['api'];
+		$record->page_url = $wiki['page'];
+		$record->type = $wiki['type'];
+
+		$DB->insert_record('filter_mediawiki', $record, false);
+	}
+}
+
