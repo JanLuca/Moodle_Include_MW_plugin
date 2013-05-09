@@ -24,22 +24,24 @@
  * @license    CC-BY-SA 3.0 or later
  */
 
-require_once( __DIR__ . '/wiki_list.php)';
+function xmldb_filter_mediawiki_install() {
+	global $DB;
 
-function xmldb_filter_activitynames_install() {
-    global $DB, $filter_mediawiki_wiki_list;
+	require __DIR__ . '/wiki_list.php';
 
-	foreach( $filter_mediawiki_wiki_list as $wiki ) {
-		$record = new stdClass();
-		$record->description = $wiki['short'];
-		$record->short_name = $wiki['short'];
-		$record->long_name = $wiki['long'];
-		$record->lang = $wiki['lang'];
-		$record->api = $wiki['api'];
-		$record->page_url = $wiki['page'];
-		$record->type = $wiki['type'];
+	foreach( $filter_mediawiki_wiki_list as $version ) {
+		foreach( $version as $wiki ) {
+			$record = new stdClass();
+			$record->description = $wiki['description'];
+			$record->short_name = $wiki['short'];
+			$record->long_name = $wiki['long'];
+			$record->lang = $wiki['lang'];
+			$record->api = $wiki['api'];
+			$record->page_url = $wiki['page'];
+			$record->type = $wiki['type'];
 
-		$DB->insert_record('filter_mediawiki', $record, false);
+			$DB->insert_record('filter_mediawiki', $record, false);
+		}
 	}
 }
 
