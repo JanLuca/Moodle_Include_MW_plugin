@@ -97,10 +97,16 @@ class admin_setting_filter_mediawiki extends admin_setting {
 			$short = html_writer::link($edit_url, htmlspecialchars($wiki->short_name));
 			$long = htmlspecialchars($wiki->long_name);
 			$description = htmlspecialchars($wiki->description);
-			$lang = htmlspecialchars($wiki->lang);
 			$api = htmlspecialchars($wiki->api);
 			$page = htmlspecialchars($wiki->page_url);
 			$type = htmlspecialchars($wiki->type);
+
+			$langs = explode(',', $wiki->lang);
+			$lang = array();
+			for	($i = 0; $i < 5; $i++) {
+				$lang[] = $langs[$i];
+			}
+			$lang = htmlspecialchars(implode(',', $lang) . ', ...');
 
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
         }
