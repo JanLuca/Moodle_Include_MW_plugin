@@ -108,7 +108,9 @@ class admin_setting_filter_mediawiki extends admin_setting {
 					$lang[] = $langs[$i];
 				}
 				$lang = htmlspecialchars(implode(',', $lang) . ', ...');
-			} else { $lang = htmlspecialchars($wiki->lang) }
+			} else {
+				$lang = htmlspecialchars($wiki->lang);
+			}
 
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
         }
