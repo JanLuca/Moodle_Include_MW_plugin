@@ -33,6 +33,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
      * Calls parent::__construct with specific arguments
      */
     public function __construct() {
+		$this->nosave = true;
         parent::__construct('filter_mediawiki/wikis', get_string( 'filtername', 'filter_mediawiki' ), '', '');
     }
 
@@ -91,12 +92,12 @@ class admin_setting_filter_mediawiki extends admin_setting {
 		$wikis = $DB->get_records('filter_mediawiki');
 
         foreach ($wikis as $wiki) {
-			$edit_url = $url->out(true, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki->id));
+			$edit_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki->id));
 
 			$short = html_writer::link($edit_url, htmlspecialchars($wiki->short_name));
 			$long = htmlspecialchars($wiki->long_name);
 			$description = htmlspecialchars($wiki->description);
-			$lang = '---';
+			$lang = htmlspecialchars($wiki->lang);
 			$api = htmlspecialchars($wiki->api);
 			$page = htmlspecialchars($wiki->page_url);
 			$type = htmlspecialchars($wiki->type);
