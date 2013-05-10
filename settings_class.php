@@ -102,11 +102,13 @@ class admin_setting_filter_mediawiki extends admin_setting {
 			$type = htmlspecialchars($wiki->type);
 
 			$langs = explode(',', $wiki->lang);
-			$lang = array();
-			for	($i = 0; $i < 5; $i++) {
-				$lang[] = $langs[$i];
-			}
-			$lang = htmlspecialchars(implode(',', $lang) . ', ...');
+			if ( count($langs) >= 5 ) {
+				$lang = array();
+				for	($i = 0; $i < 5; $i++) {
+					$lang[] = $langs[$i];
+				}
+				$lang = htmlspecialchars(implode(',', $lang) . ', ...');
+			} else { $lang = htmlspecialchars($wiki->lang) }
 
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
         }
