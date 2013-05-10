@@ -91,15 +91,15 @@ class admin_setting_filter_mediawiki extends admin_setting {
 		$wikis = $DB->get_records('filter_mediawiki');
 
         foreach ($wikis as $wiki) {
-			$edit_url = $url->out(true, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki['id']));
+			$edit_url = $url->out(true, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki->id));
 
-			$short = html_writer::link($edit_url, htmlspecialchars($wiki['short_name']));
-			$long = htmlspecialchars($wiki['long_name']);
-			$description = htmlspecialchars($wiki['description']);
+			$short = html_writer::link($edit_url, htmlspecialchars($wiki->short_name));
+			$long = htmlspecialchars($wiki->long_name);
+			$description = htmlspecialchars($wiki->description);
 			$lang = '---';
-			$api = htmlspecialchars($wiki['api']);
-			$page = htmlspecialchars($wiki['page_url']);
-			$type = htmlspecialchars($wiki['type']);
+			$api = htmlspecialchars($wiki->api);
+			$page = htmlspecialchars($wiki->page_url);
+			$type = htmlspecialchars($wiki->type);
 
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
         }
