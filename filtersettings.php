@@ -94,7 +94,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
 			$edit_url = $url->out(true, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki['id']));
 
 			$short = html_writer::link($edit_url, htmlspecialchars($wiki['short_name']));
-			$long = htmlspecialchars($wiki['long_name'])
+			$long = htmlspecialchars($wiki['long_name']);
 			$description = htmlspecialchars($wiki['description']);
 			$lang = '---';
 			$api = htmlspecialchars($wiki['api']);
