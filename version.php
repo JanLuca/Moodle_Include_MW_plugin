@@ -26,9 +26,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2013050907;
+$plugin->version   = 2013051000;
 $plugin->component = 'filter_mediawiki';
-$plugin->release   = '1.0 Alpha (Build: 2013050906)';
+$plugin->release   = '1.0 Alpha (Build: 2013051000)';
 $plugin->requires  = 2012062500;
 $plugin->cron      = 0;
 $plugin->maturity  = MATURITY_ALPHA;
