@@ -25,6 +25,18 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+function format_settings_filter_mediawiki($label, $input, $name, $description, $labelfor = null) {
+	$return = html_writer::start_div('form-item clearfix');
+	$return .= html_writer::start_div('form-label');
+	$return .= html_writer::label($label, $labelfor);
+	$return .= html_writer::span($name, 'form-shortname');
+	$return .= html_writer::end_div();
+	$return .= html_writer::div($input, 'form-setting');
+	$return .= html_writer::div($description, 'form-description');
+	$return .= html_writer::end_div();
+	return $return;
+}
+
 /**
  * Special class for mediawiki-filter administration.
  */
@@ -94,12 +106,12 @@ class admin_setting_filter_mediawiki extends admin_setting {
         foreach ($wikis as $wiki) {
 			$edit_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki->id));
 
-			$short = html_writer::link($edit_url, htmlspecialchars($wiki->short_name));
-			$long = htmlspecialchars($wiki->long_name);
-			$description = htmlspecialchars($wiki->description);
-			$api = htmlspecialchars($wiki->api);
-			$page = htmlspecialchars($wiki->page_url);
-			$type = htmlspecialchars($wiki->type);
+			$short = html_writer::link($edit_url, format_text($wiki->short_name, FORMAT_HTML));
+			$long = format_text($wiki->long_name, FORMAT_HTML);
+			$description = format_text($wiki->description, FORMAT_HTML);
+			$api = format_text($wiki->api, FORMAT_HTML);
+			$page = format_text($wiki->page_url, FORMAT_HTML);
+			$type = format_text($wiki->type, FORMAT_HTML);
 
 			$langs = explode(',', $wiki->lang);
 			if ( count($langs) >= 5 ) {
@@ -116,6 +128,188 @@ class admin_setting_filter_mediawiki extends admin_setting {
         }
         $return .= html_writer::table($table);
         $return .= $OUTPUT->box_end();
+        return highlight($query, $return);
+    }
+}
+
+/**
+ * Special class for mediawiki-filter administration.
+ */
+class admin_setting_filter_mediawiki_wiki extends admin_setting {
+	/**
+     * Current action of the form (edit, add or delete)
+     */
+	private $action;
+
+	/**
+     * Id of the current wiki
+     */
+	private $wiki_id;
+
+    /**
+     * Calls parent::__construct with specific arguments
+     */
+    public function __construct($action, $wiki_id = null) {
+		$this->nosave = true;
+		$this->action = $action;
+		$this->wiki_id = $wiki_id;
+        parent::__construct('filter_mediawiki/wiki_action', get_string( 'filtername', 'filter_mediawiki' ), '', '');
+    }
+
+    /**
+     * Always returns true, does nothing
+     *
+     * @return true
+     */
+    public function get_setting() {
+        return true;
+    }
+
+    /**
+     * Always returns true, does nothing
+     *
+     * @return true
+     */
+    public function get_defaultsetting() {
+        return true;
+    }
+
+    /**
+     * Always returns '', does not write anything
+     *
+     * @return string Always returns ''
+     */
+    public function write_setting($data) {
+        // do not write any setting
+        return '';
+    }
+
+    /**
+     * Builds the XHTML to display the control
+     *
+     * @param string $data Unused
+     * @param string $query
+     * @return string
+     */
+    public function output_html($data, $query='') {
+        global $PAGE, $OUTPUT, $DB;
+        $url = $PAGE->url;
+
+        // display strings
+        $txt = get_strings(array('short', 'long', 'description', 'lang', 'api', 'page', 'type',
+			'description_short', 'description_long', 'description_description',
+			'description_lang', 'description_api', 'description_page', 'description_type',
+			'type_wikimedia'), 'filter_mediawiki');
+
+		$return = '';
+		$short_input = '';
+		$long_input = '';
+		$description_input = '';
+		$lang_input = '';
+		$api_input = '';
+		$page_input = '';
+		$type_input = '';
+
+		if ( $this->action = 'edit' ) {
+			$formated_id = format_text($this->wiki_id, FORMAT_HTML);
+
+			$wiki = $DB->get_record('filter_mediawiki', array('id' => $this->wiki_id));
+			if ( $wiki == false ) {
+				print_error('unknownid', 'filter_mediawiki', $formated_id);
+			}
+
+			$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(true,
+				array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $formated_id, 'submit' => true))));
+
+			/*
+			$table = new html_table();
+			$table->colclasses = array('leftalign', 'leftalign');
+			$table->id = 'table_editwiki';
+			$table->attributes['class'] = '';
+			$table->data  = array();
+
+			$short_label = html_writer::label($txt->short, 'filter_mediawiki_short');
+			$short = ;
+			$short = html_writer::div($short, 'form-text defaultsnext');
+			*/
+
+			$short_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_short', 'name' => 'filter_mediawiki_short',
+				'value' => format_text($wiki->short_name, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$long_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_long', 'name' => 'filter_mediawiki_long',
+				'value' => format_text($wiki->long_name, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$description_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_description', 'name' => 'filter_mediawiki_description',
+				'value' => format_text($wiki->description, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$lang_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_lang', 'name' => 'filter_mediawiki_lang',
+				'value' => format_text($wiki->lang, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$api_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_api', 'name' => 'filter_mediawiki_api',
+				'value' => format_text($wiki->api, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$page_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_page', 'name' => 'filter_mediawiki_page',
+				'value' => format_text($wiki->page_url, FORMAT_HTML))), 'form-text defaultsnext');
+
+			$type_input = html_writer::div(html_writer::select(array('wikimedia' => $txt->type_wikimedia),
+				'filter_mediawiki_type', format_text($wiki->type, FORMAT_HTML), '',
+				array('id' => 'filter_mediawiki_type')), 'form-select defaultsnext');
+		}
+
+		$return .= format_settings_filter_mediawiki($txt->short, $short_input,
+			'short_name', $txt->description_short, 'filter_mediawiki_short');
+
+		$return .= format_settings_filter_mediawiki($txt->long, $long_input,
+			'long_name', $txt->description_long, 'filter_mediawiki_long');
+
+		$return .= format_settings_filter_mediawiki($txt->description, $description_input,
+			'description', $txt->description_description, 'filter_mediawiki_description');
+
+		$return .= format_settings_filter_mediawiki($txt->lang, $lang_input,
+			'lang', $txt->description_lang, 'filter_mediawiki_lang');
+
+		$return .= format_settings_filter_mediawiki($txt->api, $api_input,
+			'api', $txt->description_api, 'filter_mediawiki_api');
+
+		$return .= format_settings_filter_mediawiki($txt->page, $page_input,
+			'page_url', $txt->description_page, 'filter_mediawiki_page');
+
+		$return .= format_settings_filter_mediawiki($txt->type, $type_input,
+			'type', $txt->description_type, 'filter_mediawiki_type');
+
+		$return .= html_writer::end_tag('form');
+
+		/*
+		//$table->data[] = array($short_label, $short);
+
+		$long = htmlspecialchars($wiki->long_name);
+		$description = htmlspecialchars($wiki->description);
+		$api = htmlspecialchars($wiki->api);
+		$page = htmlspecialchars($wiki->page_url);
+		$type = htmlspecialchars($wiki->type);
+
+		$langs = explode(',', $wiki->lang);
+		if ( count($langs) >= 5 ) {
+			$lang = array();
+			for	($i = 0; $i < 5; $i++) {
+				$lang[] = $langs[$i];
+			}
+			$lang = htmlspecialchars(implode(',', $lang) . ', ...');
+		} else {
+			$lang = htmlspecialchars($wiki->lang);
+		}
+
+		$table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
+
+        $return .= html_writer::table($table);
+		*/
+
         return highlight($query, $return);
     }
 }
