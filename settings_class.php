@@ -119,9 +119,9 @@ class admin_setting_filter_mediawiki extends admin_setting {
 				for	($i = 0; $i < 5; $i++) {
 					$lang[] = $langs[$i];
 				}
-				$lang = htmlspecialchars(implode(',', $lang) . ', ...');
+				$lang = format_text(implode(',', $lang) . ', ...', FORMAT_HTML);
 			} else {
-				$lang = htmlspecialchars($wiki->lang);
+				$lang = format_text($wiki->lang, FORMAT_HTML);
 			}
 
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
@@ -215,23 +215,11 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 
 			$wiki = $DB->get_record('filter_mediawiki', array('id' => $this->wiki_id));
 			if ( $wiki == false ) {
-				print_error('unknownid', 'filter_mediawiki', $formated_id);
+				print_error('unknownid', 'filter_mediawiki', '', $formated_id);
 			}
 
 			$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(true,
 				array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $formated_id, 'submit' => true))));
-
-			/*
-			$table = new html_table();
-			$table->colclasses = array('leftalign', 'leftalign');
-			$table->id = 'table_editwiki';
-			$table->attributes['class'] = '';
-			$table->data  = array();
-
-			$short_label = html_writer::label($txt->short, 'filter_mediawiki_short');
-			$short = ;
-			$short = html_writer::div($short, 'form-text defaultsnext');
-			*/
 
 			$short_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
 				'id' => 'filter_mediawiki_short', 'name' => 'filter_mediawiki_short',
@@ -283,33 +271,37 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		$return .= format_settings_filter_mediawiki($txt->type, $type_input,
 			'type', $txt->description_type, 'filter_mediawiki_type');
 
+		$return .= html_writer::div(html_writer::empty_tag('input', array('type' => 'submit',
+			'value' => get_string('savechanges','admin'), 'class' => 'form-submit')), 'form-buttons');
+
 		$return .= html_writer::end_tag('form');
-
-		/*
-		//$table->data[] = array($short_label, $short);
-
-		$long = htmlspecialchars($wiki->long_name);
-		$description = htmlspecialchars($wiki->description);
-		$api = htmlspecialchars($wiki->api);
-		$page = htmlspecialchars($wiki->page_url);
-		$type = htmlspecialchars($wiki->type);
-
-		$langs = explode(',', $wiki->lang);
-		if ( count($langs) >= 5 ) {
-			$lang = array();
-			for	($i = 0; $i < 5; $i++) {
-				$lang[] = $langs[$i];
-			}
-			$lang = htmlspecialchars(implode(',', $lang) . ', ...');
-		} else {
-			$lang = htmlspecialchars($wiki->lang);
-		}
-
-		$table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
-
-        $return .= html_writer::table($table);
-		*/
 
         return highlight($query, $return);
     }
+}
+
+function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
+	global $DB;
+
+	$record = new stdClass();
+	$record->description = required_param('filter_mediawiki_description', PARAM_TEXT);
+	$record->short_name = required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT);
+	$record->long_name = required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT);
+	$record->lang = optional_param('filter_mediawiki_lang', '', PARAM_TEXT);
+	$record->api = required_param('filter_mediawiki_api', PARAM_TEXT);
+	$record->page_url = required_param('filter_mediawiki_page', PARAM_TEXT);
+	$record->type = required_param('filter_mediawiki_type', PARAM_ALPHANUMEXT);
+
+	if ( $action == 'edit' ) {
+		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
+			$record->id = $db_id;
+			$DB->update_record('filter_mediawiki', $record);
+		} else {
+			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+		}
+	} elseif ( $action == 'add' ) {
+		$DB->insert_record('filter_mediawiki', $record, false);
+	} else {
+		print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
+	}
 }

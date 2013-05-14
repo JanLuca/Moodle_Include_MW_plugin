@@ -28,12 +28,29 @@ defined('MOODLE_INTERNAL') || die;
 require_once __DIR__ . '/settings_class.php';
 
 $action = optional_param('action', 'default', PARAM_ALPHANUMEXT);
+$submit = optional_param('submit', false, PARAM_BOOL);
+$id = optional_param('id', -1, PARAM_INT);
 
-if ( $ADMIN->fulltree ) {
+if ( $submit ) {
+	if ( confirm_sesskey() ) {
+		if ( $action == 'add' ) {
+			$settings->add(new admin_setting_filter_mediawiki_wiki('add'));
+		} elseif ( $action == 'delete' && $id >= 0 ) {
+			$settings->add(new admin_setting_filter_mediawiki_wiki('delete', $id));
+		} elseif ( $action == 'edit' && $id >= 0 ) {
+
+		} elseif ( $id < 0 ) {
+			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+		} else {
+			print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
+		}
+	} else {
+		print_error('invalidsesskey');
+	}
+} elseif ( $ADMIN->fulltree ) {
 	if ( $action == 'default' ) {
 		$settings->add(new admin_setting_filter_mediawiki());
 	} elseif ( confirm_sesskey() ) {
-		$id = optional_param('id', -1, PARAM_INT);
 		if ( $action == 'add' ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('add'));
 		} elseif ( $action == 'delete' && $id >= 0 ) {
@@ -41,14 +58,11 @@ if ( $ADMIN->fulltree ) {
 		} elseif ( $action == 'edit' && $id >= 0 ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('edit', $id));
 		} elseif ( $id < 0 ) {
-			print_error('unknownid', 'filter_mediawiki', format_text($id, FORMAT_HTML));
+			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		} else {
-			print_error('unknownaction', 'filter_mediawiki', format_text($action, FORMAT_HTML));
+			print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
 		}
 	} else {
 		print_error('invalidsesskey');
 	}
-
-    //$settings->add(new admin_setting_configtextarea('filter_censor_badwords', get_string('badwordslist','admin'),
-    //               get_string('badwordsconfig', 'admin').'<br />'.get_string('badwordsdefault', 'admin'), ''));
 }
