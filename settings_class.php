@@ -210,6 +210,8 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		$page_input = '';
 		$type_input = '';
 
+		$return .= html_writer::end_tag('form');
+
 		if ( $this->action = 'edit' ) {
 			$formated_id = format_text($this->wiki_id, FORMAT_HTML);
 
@@ -218,7 +220,7 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 				print_error('unknownid', 'filter_mediawiki', '', $formated_id);
 			}
 
-			$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(true,
+			$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(false,
 				array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $formated_id, 'submit' => true))));
 
 			$short_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
@@ -272,7 +274,7 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 			'type', $txt->description_type, 'filter_mediawiki_type');
 
 		$return .= html_writer::div(html_writer::empty_tag('input', array('type' => 'submit',
-			'value' => get_string('savechanges','admin'))), 'form-buttons');
+			'value' => get_string('savechanges','admin'), 'class' => 'form-submit')), 'form-buttons');
 
 		$return .= html_writer::end_tag('form');
 
