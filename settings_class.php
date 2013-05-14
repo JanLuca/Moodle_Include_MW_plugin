@@ -272,7 +272,7 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 			'type', $txt->description_type, 'filter_mediawiki_type');
 
 		$return .= html_writer::div(html_writer::empty_tag('input', array('type' => 'submit',
-			'value' => get_string('savechanges','admin'), 'class' => 'form-submit')), 'form-buttons');
+			'value' => get_string('savechanges','admin'))), 'form-buttons');
 
 		$return .= html_writer::end_tag('form');
 
