@@ -210,8 +210,6 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		$page_input = '';
 		$type_input = '';
 
-		$return .= html_writer::end_tag('form');
-
 		if ( $this->action = 'edit' ) {
 			$formated_id = format_text($this->wiki_id, FORMAT_HTML);
 
@@ -220,8 +218,16 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 				print_error('unknownid', 'filter_mediawiki', '', $formated_id);
 			}
 
-			$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(false,
-				array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $formated_id, 'submit' => true))));
+			//$return .= html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(false,
+			//	array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $formated_id, 'submit' => true))));
+
+			$return .= html_writer::input_hidden_params($url, array('sesskey', 'action', 'id', 'submit'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'action', 'value' => 'edit'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'id', 'value' => $formated_id));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'submit', 'value' => true));
 
 			$short_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
 				'id' => 'filter_mediawiki_short', 'name' => 'filter_mediawiki_short',
