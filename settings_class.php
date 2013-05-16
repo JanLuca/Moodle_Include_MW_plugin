@@ -90,13 +90,14 @@ class admin_setting_filter_mediawiki extends admin_setting {
 
         // display strings
         $txt = get_strings(array('short', 'long', 'description', 'lang', 'api', 'page', 'type'), 'filter_mediawiki');
+		$strstd = get_strings(array('delete', 'edit'));
 
         $return = $OUTPUT->heading(get_string('includeablewikis', 'filter_mediawiki'), 3, 'main');
         $return .= $OUTPUT->box_start('generalbox editorsui');
 
         $table = new html_table();
-        $table->head  = array($txt->short, $txt->long, $txt->description, $txt->lang, $txt->api, $txt->page, $txt->type);
-        $table->colclasses = array('centeralign', 'centeralign', 'leftalign', 'leftalign', 'leftalign', 'leftalign', 'leftalign');
+        $table->head  = array($txt->short, $txt->long, $txt->description, $txt->lang, $txt->api, $txt->page, $txt->type, $strstd->edit);
+        $table->colclasses = array('centeralign', 'centeralign', 'leftalign', 'leftalign', 'leftalign', 'leftalign', 'leftalign', 'centeralign');
         $table->id = 'includeablewikis';
         $table->attributes['class'] = 'admintable generaltable';
         $table->data  = array();
@@ -105,6 +106,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
 
         foreach ($wikis as $wiki) {
 			$edit_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'edit', 'id' => $wiki->id));
+			$delete_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'delete', 'id' => $wiki->id));
 
 			$short = html_writer::link($edit_url, format_text($wiki->short_name, FORMAT_HTML));
 			$long = format_text($wiki->long_name, FORMAT_HTML);
@@ -112,6 +114,11 @@ class admin_setting_filter_mediawiki extends admin_setting {
 			$api = format_text($wiki->api, FORMAT_HTML);
 			$page = format_text($wiki->page_url, FORMAT_HTML);
 			$type = format_text($wiki->type, FORMAT_HTML);
+			$buttons = html_writer::link($delete_url, html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/delete'),
+				'alt' => $strstd->delete, 'class' => 'iconsmall')), array('title' => $strstd->delete));
+			$buttons .= ' ';
+			$buttons .= html_writer::link($edit_url, html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/edit'),
+				'alt' => $strstd->edit, 'class' => 'iconsmall')), array('title' => $strstd->edit));
 
 			$langs = explode(',', $wiki->lang);
 			if ( count($langs) >= 5 ) {
@@ -124,7 +131,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
 				$lang = format_text($wiki->lang, FORMAT_HTML);
 			}
 
-            $table->data[] = array($short, $long, $description, $lang, $api, $page, $type);
+            $table->data[] = array($short, $long, $description, $lang, $api, $page, $type, $delete);
         }
         $return .= html_writer::table($table);
         $return .= $OUTPUT->box_end();
