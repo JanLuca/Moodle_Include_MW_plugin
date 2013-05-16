@@ -10,6 +10,7 @@ $string['lang'] = 'Possible languages';
 $string['api'] = 'API url';
 $string['page'] = 'Page url';
 $string['type'] = 'Wiki type';
+$string['add_wiki'] = 'Add new wiki';
 
 // Settings-description: Wiki
 $string['description_short'] = 'Short wiki name';

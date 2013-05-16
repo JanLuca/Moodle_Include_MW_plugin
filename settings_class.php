@@ -89,7 +89,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
         $url = $PAGE->url;
 
         // display strings
-        $txt = get_strings(array('short', 'long', 'description', 'lang', 'api', 'page', 'type'), 'filter_mediawiki');
+        $txt = get_strings(array('short', 'long', 'description', 'lang', 'api', 'page', 'type', 'add_wiki'), 'filter_mediawiki');
 		$strstd = get_strings(array('delete', 'edit'));
 
         $return = $OUTPUT->heading(get_string('includeablewikis', 'filter_mediawiki'), 3, 'main');
@@ -113,7 +113,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
 			$description = format_text($wiki->description, FORMAT_HTML);
 			$api = format_text($wiki->api, FORMAT_HTML);
 			$page = format_text($wiki->page_url, FORMAT_HTML);
-			$type = format_text($wiki->type, FORMAT_HTML);
+			$type = get_string('type_'.format_text($wiki->type, FORMAT_HTML), 'filter_mediawiki');
 			$buttons = html_writer::link($delete_url, html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/delete'),
 				'alt' => $strstd->delete, 'class' => 'iconsmall')), array('title' => $strstd->delete));
 			$buttons .= ' ';
@@ -134,6 +134,10 @@ class admin_setting_filter_mediawiki extends admin_setting {
             $table->data[] = array($short, $long, $description, $lang, $api, $page, $type, $buttons);
         }
         $return .= html_writer::table($table);
+
+		$add_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'add'));
+		$return .= html_writer::div($OUTPUT->single_button($add_url, $txt->add_wiki, 'get'), 'form-buttons');
+
         $return .= $OUTPUT->box_end();
         return highlight($query, $return);
     }
