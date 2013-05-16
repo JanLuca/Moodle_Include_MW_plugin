@@ -135,8 +135,10 @@ class admin_setting_filter_mediawiki extends admin_setting {
         }
         $return .= html_writer::table($table);
 
-		$add_url = $url->out(false, array('sesskey' => sesskey(), 'action' => 'add'));
-		$return .= html_writer::div($OUTPUT->single_button($add_url, $txt->add_wiki, 'get'), 'form-buttons');
+		$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'action', 'value' => 'redirect_add'));
+		$return .= html_writer::empty_tag('input', array('type' => 'submit',
+			'value' => ' '.$txt->add_wiki.' ', 'class' => 'form-submit'));
 
         $return .= $OUTPUT->box_end();
         return highlight($query, $return);

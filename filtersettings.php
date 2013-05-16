@@ -51,7 +51,7 @@ if ( $submit ) {
 			} else {
 				print_error('db_update_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 			}
-		} elseif ( $id < 0 ) {
+		} elseif ( $id < -1 ) {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		} else {
 			print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
@@ -65,11 +65,14 @@ if ( $submit ) {
 	} elseif ( confirm_sesskey() ) {
 		if ( $action == 'add' ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('add'));
+		} elseif ( $action == 'redirect_add' ){
+			$add_url = $PAGE->url->out(false, array('sesskey' => sesskey(), 'action' => 'add'));
+			redirect($add_url);
 		} elseif ( $action == 'delete' && $id >= 0 ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('delete', $id));
 		} elseif ( $action == 'edit' && $id >= 0 ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('edit', $id));
-		} elseif ( $id < 0 ) {
+		} elseif ( $id < -1 ) {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		} else {
 			print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
