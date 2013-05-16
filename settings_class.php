@@ -131,7 +131,7 @@ class admin_setting_filter_mediawiki extends admin_setting {
 				$lang = format_text($wiki->lang, FORMAT_HTML);
 			}
 
-            $table->data[] = array($short, $long, $description, $lang, $api, $page, $type, $delete);
+            $table->data[] = array($short, $long, $description, $lang, $api, $page, $type, $buttons);
         }
         $return .= html_writer::table($table);
         $return .= $OUTPUT->box_end();
