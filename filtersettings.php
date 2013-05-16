@@ -38,7 +38,7 @@ if ( $submit ) {
 		} elseif ( $action == 'delete' && $id >= 0 ) {
 			$settings->add(new admin_setting_filter_mediawiki_wiki('delete', $id));
 		} elseif ( $action == 'edit' && $id >= 0 ) {
-
+			filter_mediawiki_submit_wiki('edit', $id);
 		} elseif ( $id < 0 ) {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		} else {
