@@ -303,12 +303,12 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 	if ( $action == 'edit' ) {
 		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
 			$record->id = $db_id;
-			$DB->update_record('filter_mediawiki', $record);
+			return $DB->update_record('filter_mediawiki', $record);
 		} else {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		}
 	} elseif ( $action == 'add' ) {
-		$DB->insert_record('filter_mediawiki', $record, false);
+		return $DB->insert_record('filter_mediawiki', $record, false);
 	} else {
 		print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
 	}

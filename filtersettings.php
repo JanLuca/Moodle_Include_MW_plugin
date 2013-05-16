@@ -34,11 +34,23 @@ $id = optional_param('id', -1, PARAM_INT);
 if ( $submit ) {
 	if ( confirm_sesskey() ) {
 		if ( $action == 'add' ) {
-			$settings->add(new admin_setting_filter_mediawiki_wiki('add'));
+			if ( filter_mediawiki_submit_wiki('add') ) {
+				$settings->add(new admin_setting_filter_mediawiki());
+			} else {
+				print_error('db_insert_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+			}
 		} elseif ( $action == 'delete' && $id >= 0 ) {
-			$settings->add(new admin_setting_filter_mediawiki_wiki('delete', $id));
+			if ( filter_mediawiki_submit_wiki('delete', $id) ) {
+				$settings->add(new admin_setting_filter_mediawiki());
+			} else {
+				print_error('db_delete_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+			}
 		} elseif ( $action == 'edit' && $id >= 0 ) {
-			filter_mediawiki_submit_wiki('edit', $id);
+			if ( filter_mediawiki_submit_wiki('edit', $id) ) {
+				$settings->add(new admin_setting_filter_mediawiki());
+			} else {
+				print_error('db_update_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+			}
 		} elseif ( $id < 0 ) {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		} else {
