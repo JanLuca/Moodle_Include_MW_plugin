@@ -227,7 +227,7 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
 				'name' => 'confirm', 'value' => true));
 
-			$return .= html_writer::div(get_string('delete_confirm', 'filter_mediawiki',
+			$return .= html_writer::tag('p', get_string('delete_confirm', 'filter_mediawiki',
 				array('short' => format_text($wiki->short_name, FORMAT_HTML),
 				'long' => format_text($wiki->long_name, FORMAT_HTML))));
 
