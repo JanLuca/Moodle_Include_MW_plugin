@@ -360,8 +360,10 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		}
 	} elseif ( $action == 'add' ) {
-		if ( $DB->count_records('filter_mediawiki', array($DB->sql_compare_text('short_name') => $short_name)) == 0 &&
-			$DB->count_records('filter_mediawiki', array($DB->sql_compare_text('long_name') => $long_name)) == 0 ) {
+		$where = $DB->sql_compare_text('short_name', 255).' = ? OR '.$DB->sql_compare_text('long_name', 255).' = ?';
+		$params = array($short_name, $long_name);
+
+		if ( $DB->count_records('filter_mediawiki', $where, $params) == 0 ) {
 			$filter_mediawiki_submit_cache[$short_name] = true;
 			return $DB->insert_record('filter_mediawiki', $record, false);
 		} else {
