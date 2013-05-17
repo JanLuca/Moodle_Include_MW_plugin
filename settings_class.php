@@ -363,7 +363,7 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 		$where = $DB->sql_compare_text('short_name', 255).' = ? OR '.$DB->sql_compare_text('long_name', 255).' = ?';
 		$params = array($short_name, $long_name);
 
-		if ( $DB->count_records('filter_mediawiki', $where, $params) == 0 ) {
+		if ( $DB->count_records_select('filter_mediawiki', $where, $params) == 0 ) {
 			$filter_mediawiki_submit_cache[$short_name] = true;
 			return $DB->insert_record('filter_mediawiki', $record, false);
 		} else {
