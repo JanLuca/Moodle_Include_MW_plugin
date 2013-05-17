@@ -223,7 +223,35 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		$page_input = '';
 		$type_input = '';
 
-		if ( $this->action = 'edit' ) {
+		if ( $this->action == 'add' ) {
+			$return .= html_writer::input_hidden_params($url, array('sesskey', 'action', 'id', 'submit'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'action', 'value' => 'edit'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'submit', 'value' => true));
+
+			$short_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_short', 'name' => 'filter_mediawiki_short')), 'form-text defaultsnext');
+
+			$long_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_long', 'name' => 'filter_mediawiki_long')), 'form-text defaultsnext');
+
+			$description_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_description', 'name' => 'filter_mediawiki_description')),
+				'form-text defaultsnext');
+
+			$lang_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_lang', 'name' => 'filter_mediawiki_lang')), 'form-text defaultsnext');
+
+			$api_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_api', 'name' => 'filter_mediawiki_api')), 'form-text defaultsnext');
+
+			$page_input = html_writer::div(html_writer::empty_tag('input', array('type' => 'text',
+				'id' => 'filter_mediawiki_page', 'name' => 'filter_mediawiki_page')), 'form-text defaultsnext');
+
+			$type_input = html_writer::div(html_writer::select(array('wikimedia' => $txt->type_wikimedia),
+				'filter_mediawiki_type', '', '', array('id' => 'filter_mediawiki_type')), 'form-select defaultsnext');
+		} elseif ( $this->action == 'edit' ) {
 			$formated_id = format_text($this->wiki_id, FORMAT_HTML);
 
 			$wiki = $DB->get_record('filter_mediawiki', array('id' => $this->wiki_id));
