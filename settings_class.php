@@ -207,6 +207,36 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
     public function output_html($data, $query='') {
         global $PAGE, $OUTPUT, $DB;
         $url = $PAGE->url;
+		$return = '';
+
+		if ( $this->action == 'delete' ) {
+			$formated_id = format_text($this->wiki_id, FORMAT_HTML);
+
+			$wiki = $DB->get_record('filter_mediawiki', array('id' => $this->wiki_id));
+			if ( $wiki == false ) {
+				print_error('unknownid', 'filter_mediawiki', '', $formated_id);
+			}
+
+			$return .= html_writer::input_hidden_params($url, array('sesskey', 'action', 'id', 'submit'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'action', 'value' => 'delete'));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'id', 'value' => $formated_id));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'submit', 'value' => true));
+			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
+				'name' => 'confirm', 'value' => true));
+
+			$return .= html_writer::div(get_string('delete_confirm', 'filter_mediawiki',
+				array('short' => format_text($wiki->short_name, FORMAT_HTML),
+				'long' => format_text($wiki->long_name, FORMAT_HTML))));
+
+			$return .= html_writer::empty_tag('input', array('type' => 'submit',
+				'value' => ' '.get_string('delete_wiki', 'filter_mediawiki').' ',
+				'class' => 'form-submit'));
+
+			return highlight($query, $return);
+		}
 
         // display strings
         $txt = get_strings(array('short', 'long', 'description', 'lang', 'api', 'page', 'type',
@@ -214,7 +244,6 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 			'description_lang', 'description_api', 'description_page', 'description_type',
 			'type_wikimedia'), 'filter_mediawiki');
 
-		$return = '';
 		$short_input = '';
 		$long_input = '';
 		$description_input = '';
@@ -323,25 +352,36 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		$return .= html_writer::div(html_writer::empty_tag('input', array('type' => 'submit',
 			'value' => get_string('savechanges','admin'), 'class' => 'form-submit')), 'form-buttons');
 
-		$return .= html_writer::end_tag('form');
-
         return highlight($query, $return);
     }
 }
 
-$filter_mediawiki_submit_cache = array();
+$filter_mediawiki_submit_add_edit = array();
+$filter_mediawiki_submit_delete = array();
 
 function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
-	global $DB, $filter_mediawiki_submit_cache;
+	global $DB, $filter_mediawiki_submit_add_edit, $filter_mediawiki_submit_delete;
+
+	if ( $action == 'delete' ) {
+		if ( !empty($filter_mediawiki_submit_delete[$id]) ) {
+			return true;
+		}
+
+		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
+			$filter_mediawiki_submit_delete[$db_id] = true;
+			return $DB->delete_records('filter_mediawiki', array('id' => $db_id));
+		} else {
+			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+		}
+	}
 
 	$short_name = required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT);
 
-	if ( !empty($filter_mediawiki_submit_cache[$short_name]) ) {
+	if ( !empty($filter_mediawiki_submit_add_edit[$short_name]) ) {
 		return true;
 	}
 
 	$long_name = required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT);
-
 	$record = new stdClass();
 	$record->short_name = $short_name;
 	$record->long_name = $long_name;
@@ -353,7 +393,7 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 
 	if ( $action == 'edit' ) {
 		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
-			$filter_mediawiki_submit_cache[$short_name] = true;
+			$filter_mediawiki_submit_add_edit[$short_name] = true;
 			$record->id = $db_id;
 			return $DB->update_record('filter_mediawiki', $record);
 		} else {
@@ -364,7 +404,7 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 		$params = array($short_name, $long_name);
 
 		if ( $DB->count_records_select('filter_mediawiki', $where, $params) == 0 ) {
-			$filter_mediawiki_submit_cache[$short_name] = true;
+			$filter_mediawiki_submit_add_edit[$short_name] = true;
 			return $DB->insert_record('filter_mediawiki', $record, false);
 		} else {
 			print_error('alreadyexists', 'filter_mediawiki', '', array('short' => format_text($short_name, FORMAT_HTML),

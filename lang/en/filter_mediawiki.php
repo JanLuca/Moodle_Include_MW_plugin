@@ -11,6 +11,8 @@ $string['api'] = 'API url';
 $string['page'] = 'Page url';
 $string['type'] = 'Wiki type';
 $string['add_wiki'] = 'Add new wiki';
+$string['delete_wiki'] = 'Delete the wiki';
+$string['delete_confirm'] = 'Do you really want to delete the wiki with the short name "{$a->short}" and the long name "{$a->long}"?';
 
 // Settings-description: Wiki
 $string['description_short'] = 'Short wiki name';
