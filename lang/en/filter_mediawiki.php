@@ -27,6 +27,7 @@ $string['type_wikimedia'] = 'Wikimedia-Wiki';
 // Errors
 $string['unknownaction'] = 'The action {$a} is unknown.';
 $string['unknownid'] = 'The id {$a} is unknown.';
+$string['alreadyexists'] = 'The wiki with the short name "{$a->short}" and/or the long name "{$a->long}" exists already.'
 $string['db_insert_error'] = 'Error when inserting new database record.';
 $string['db_delete_error'] = 'Error when deleting database record with id {$a}.';
 $string['db_update_error'] = 'Error when updating database record with id {$a}.';

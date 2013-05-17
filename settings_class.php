@@ -226,7 +226,7 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
 		if ( $this->action == 'add' ) {
 			$return .= html_writer::input_hidden_params($url, array('sesskey', 'action', 'id', 'submit'));
 			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
-				'name' => 'action', 'value' => 'edit'));
+				'name' => 'action', 'value' => 'add'));
 			$return .= html_writer::empty_tag('input', array('type' => 'hidden',
 				'name' => 'submit', 'value' => true));
 
@@ -329,13 +329,23 @@ class admin_setting_filter_mediawiki_wiki extends admin_setting {
     }
 }
 
+$filter_mediawiki_submit_cache = array();
+
 function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
-	global $DB;
+	global $DB, $filter_mediawiki_submit_cache;
+
+	$short_name = required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT);
+
+	if ( !empty($filter_mediawiki_submit_cache[$short_name]) ) {
+		return true;
+	}
+
+	$long_name = required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT);
 
 	$record = new stdClass();
+	$record->short_name = $short_name;
+	$record->long_name = $long_name;
 	$record->description = required_param('filter_mediawiki_description', PARAM_TEXT);
-	$record->short_name = required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT);
-	$record->long_name = required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT);
 	$record->lang = optional_param('filter_mediawiki_lang', '', PARAM_TEXT);
 	$record->api = required_param('filter_mediawiki_api', PARAM_TEXT);
 	$record->page_url = required_param('filter_mediawiki_page', PARAM_TEXT);
@@ -343,13 +353,21 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 
 	if ( $action == 'edit' ) {
 		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
+			$filter_mediawiki_submit_cache[$short_name] = true;
 			$record->id = $db_id;
 			return $DB->update_record('filter_mediawiki', $record);
 		} else {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		}
 	} elseif ( $action == 'add' ) {
-		return $DB->insert_record('filter_mediawiki', $record, false);
+		if ( $DB->count_records('filter_mediawiki', array('short_name' => $short_name)) == 0 &&
+			$DB->count_records('filter_mediawiki', array('long_name' => $long_name)) == 0 ) {
+			$filter_mediawiki_submit_cache[$short_name] = true;
+			return $DB->insert_record('filter_mediawiki', $record, false);
+		} else {
+			print_error('alreadyexists', 'filter_mediawiki', '', array('short' => format_text($short_name, FORMAT_HTML),
+				'long' => format_text($long_name, FORMAT_HTML)));
+		}
 	} else {
 		print_error('unknownaction', 'filter_mediawiki', '', format_text($action, FORMAT_HTML));
 	}
