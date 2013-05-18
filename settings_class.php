@@ -392,10 +392,36 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 	$record->type = required_param('filter_mediawiki_type', PARAM_ALPHANUMEXT);
 
 	if ( $action == 'edit' ) {
-		if ( ($db_id = $DB->get_field('filter_mediawiki', 'id', array('id' => $id))) !== false ) {
-			$filter_mediawiki_submit_add_edit[$short_name] = true;
-			$record->id = $db_id;
-			return $DB->update_record('filter_mediawiki', $record);
+		if ( ($db_update = $DB->get_record('filter_mediawiki', array('id' => $id), 'id, short_name, long_name')) !== false ) {
+			$update = true;
+
+			if ( $short_name != $db_update->short_name ) {
+				$where = $DB->sql_compare_text('short_name', 255).' = ?';
+				$params = array($short_name);
+
+				if ( $DB->count_records_select('filter_mediawiki', $where, $params) > 0 ) {
+					$update = false;
+					print_error('alreadyexists', 'filter_mediawiki', '', array('short' => format_text($short_name, FORMAT_HTML),
+						'long' => format_text($long_name, FORMAT_HTML)));
+				}
+			}
+
+			if ( $update && $long_name != $db_update->long_name ) {
+				$where = $DB->sql_compare_text('long_name', 255).' = ?';
+				$params = array($long_name);
+
+				if ( $DB->count_records_select('filter_mediawiki', $where, $params) > 0 ) {
+					$update = false;
+					print_error('alreadyexists', 'filter_mediawiki', '', array('short' => format_text($short_name, FORMAT_HTML),
+						'long' => format_text($long_name, FORMAT_HTML)));
+				}
+			}
+
+			if ( $update ) {
+				$filter_mediawiki_submit_add_edit[$short_name] = true;
+				$record->id = $db_update->id;
+				return $DB->update_record('filter_mediawiki', $record);
+			}
 		} else {
 			print_error('unknownid', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
 		}
