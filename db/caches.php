@@ -7,7 +7,7 @@ $definitions = array(
 
 	'already_replaced' => array(
 		'mode' => cache_store::MODE_REQUEST
-	)
+	),
 
 	'submit' => array(
 		'mode' => cache_store::MODE_REQUEST,
