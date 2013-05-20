@@ -31,7 +31,7 @@ $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'wq', 'long' => 'w
 
 $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'voy', 'long' => 'wikivoyage', 'description' => 'Wikivoyage',
 	'lang' => 'de,en,es,fr,he,it,nl,pl,pt,ro,ru,sv,uk', 'api' => 'https://$lang.wikivoyage.org/w/api.php',
-	'page' => '	//$lang.wikivoyage.org/wiki/$1', 'type' => 'wikimedia' );
+	'page' => '//$lang.wikivoyage.org/wiki/$1', 'type' => 'wikimedia' );
 
 $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'wd', 'long' => 'wikidata', 'description' => 'Wikidata',
 	'lang' => null, 'api' => 'https://www.wikidata.org/w/api.php',
@@ -39,8 +39,8 @@ $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'wd', 'long' => 'w
 
 $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'commons', 'long' => 'commons', 'description' => 'Wikimedia Commons',
 	'lang' => null, 'api' => 'https://commons.wikimedia.org/w/api.php',
-	'page' => '	//commons.wikimedia.org/wiki/$1', 'type' => 'wikimedia' );
+	'page' => '//commons.wikimedia.org/wiki/$1', 'type' => 'wikimedia' );
 
 $filter_mediawiki_wiki_list[2013050906][] = array( 'short' => 'meta', 'long' => 'meta', 'description' => 'Wikimedia Meta-Wiki',
 	'lang' => null, 'api' => 'https://meta.wikimedia.org/w/api.php',
-	'page' => '	//meta.wikimedia.org/wiki/$1', 'type' => 'wikimedia' );
+	'page' => '//meta.wikimedia.org/wiki/$1', 'type' => 'wikimedia' );

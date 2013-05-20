@@ -26,20 +26,45 @@
 
 class filter_mediawiki extends moodle_text_filter {
 	public function filter($text, array $options = array()) {
-		global $PAGE;
+		global $PAGE, $DB;
 
-		$regex = '@\[Include\-WV\].*\/\/(.*)\.wikiversity\.org\/wiki\/(.*)\??\[\/Include\-WV]@i';
+		$wikis_cache = cache::make('filter_mediawiki', 'wikis');
 
-		$already_replaced = array();
+		if ( ($short = $wikis_cache->get('short')) === false ||
+			($long = $wikis_cache->get('long')) === false ) {
+			$wikis = $DB->get_records('filter_mediawiki');
 
-		$styles = '<link rel="stylesheet" href="https://bits.wikimedia.org/de.wikiversity.org/load.php?debug=false&amp;lang=de&amp;modules=ext.wikihiero%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmw.PopUpMediaTransform%7Cskins.vector&amp;only=styles&amp;skin=vector&amp;*" />';
-		$styles .= '<style type="text/css">.center{width: auto; text-align: left;} body {font-family: Arial,Verdana,Helvetica,sans-serif; font-size:13px;}</style>';
-		
+			$short = array();
+			$long = array();
+			foreach ( $wikis as $wiki ) {
+				$short[$wiki->short_name] = array('lang' => $wiki->lang, 'api' => $wiki->api,
+					'page' => $wiki->page_url, 'type' => $wiki->type);
+				$long[$wiki->long_name] = array('lang' => $wiki->lang, 'api' => $wiki->api,
+					'page' => $wiki->page_url, 'type' => $wiki->type);
+			}
+
+			$wikis_cache->set_many(array('short' => $short, 'long' => $long));
+		}
+
+		var_dump($short);
+		echo '<br /><br /><br />';
+		var_dump($long);
+		echo '<br /><br /><br />';
+
+		$regex = '@[\[<]Include(.*?)[\]>]((.*?)[\[<]/Include.*?[\]>])?@i';
+
+		$already_replaced = cache::make('filter_mediawiki', 'already_replaced');
+
+		$styles_wikimedia = '<link rel="stylesheet" href="https://bits.wikimedia.org/de.wikiversity.org/load.php?debug=false&amp;lang=de&amp;modules=ext.wikihiero%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmw.PopUpMediaTransform%7Cskins.vector&amp;only=styles&amp;skin=vector&amp;*" />';
+		$styles_wikimedia .= '<style type="text/css">.center{width: auto; text-align: left;} body {font-family: Arial,Verdana,Helvetica,sans-serif; font-size:13px;}</style>';
+
 		if ( preg_match_all( $regex, $text, $matches, PREG_SET_ORDER ) ) {
-			$text = $styles.$text;
+			$ins_styles_wikimedia = false;
 
 			foreach( $matches as $match ) {
-				$wv_lang = $match[1];
+				var_dump($match);
+				echo '<br /><br />';
+				/*$wv_lang = $match[1];
 				$title = $match[2];
 
 				if( !empty( $already_replaced[$wv_lang.$title] ) ) continue;
@@ -72,7 +97,11 @@ class filter_mediawiki extends moodle_text_filter {
 
 				$text = str_replace( $match[0], $page, $text );
 
-				$already_replaced[$wv_lang.$title] = true;
+				$already_replaced[$wv_lang.$title] = true;*/
+			}
+
+			if ( $ins_styles_wikimedia ) {
+				$text = $styles_wikimedia.$text;
 			}
 		}
 

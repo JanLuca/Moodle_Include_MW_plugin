@@ -34,6 +34,11 @@ $string['db_insert_error'] = 'Error when inserting new database record.';
 $string['db_delete_error'] = 'Error when deleting database record with id {$a}.';
 $string['db_update_error'] = 'Error when updating database record with id {$a}.';
 
+// Caches
+$string['cachedef_wikis'] = 'Cache with the wikis that should be replaced';
+$string['cachedef_already_replaced'] = 'Cache with already replaced text parts';
+$string['cachedef_submit'] = 'Cache with already submitted DB changes';
+
 // Info-strings for type wikimedia
 $string['wikimedia_isfrom'] = 'The preceding text is included from {$a->wiki_name}. The original page you can find under {$a->page_link}. ';
 $string['wikimedia_license'] = 'The text was released under the <a href="https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License">CC-BY-SA 3.0 License</a> and the <a href="https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_GNU_Free_Documentation_License">GFDL</a>. ' .
