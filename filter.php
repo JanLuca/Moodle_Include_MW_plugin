@@ -31,27 +31,55 @@ class filter_mediawiki extends moodle_text_filter {
 		$wikis_cache = cache::make('filter_mediawiki', 'wikis');
 
 		if ( ($short = $wikis_cache->get('short')) === false ||
-			($long = $wikis_cache->get('long')) === false ) {
+			($long = $wikis_cache->get('long')) === false ||
+			($wiki_data = $wikis_cache->get('data')) === false ||
+			($wiki_domains = $wikis_cache->get('domains')) === false ) {
 			$wikis = $DB->get_records('filter_mediawiki');
 
 			$short = array();
 			$long = array();
+			$wiki_domains = array();
+			$wiki_data = array();
 			foreach ( $wikis as $wiki ) {
-				$short[$wiki->short_name] = array('lang' => $wiki->lang, 'api' => $wiki->api,
-					'page' => $wiki->page_url, 'type' => $wiki->type);
-				$long[$wiki->long_name] = array('lang' => $wiki->lang, 'api' => $wiki->api,
-					'page' => $wiki->page_url, 'type' => $wiki->type);
+				// Use strtolower so we can use "==" case-insensitive
+				$short_name = trim(strtolower($wiki->short_name));
+				$long_name = trim(strtolower($wiki->long_name));
+				$langs_str = trim(strtolower($wiki->lang));
+				$api = trim($wiki->api);
+				$page_url = trim(strtolower($wiki->page_url));
+				$type = trim(strtolower($wiki->type));
+
+				$index = (array_push($wiki_data, array('short' => $short_name, 'long' => $long_name, 'lang' => $langs_str,
+					'api' => $api, 'page' => $page_url, 'type' => $type))) - 1;
+				$short[$short_name] = $index;
+				$long[$long_name] = $index;
+
+				$langs = explode(',', $langs_str);
+				$langs = array_map('trim', $langs);
+				$domain_parts = explode('/', $page_url);
+				$i = 0;
+				while($i < 5) {
+					$i++;
+					$part = trim(strtolower(array_shift($domain_parts)));
+					if ( empty($part) || $part == 'http:' || $part == 'https:' ) continue;
+
+					if ( strpos($part, '$lang') !== false ) {
+						foreach ( $langs as $lang ) {
+							$domain = str_replace('$lang', $lang, $part);
+							$wiki_domains[$domain] = array('index' => $index, 'parts' => $domain_parts);
+						}
+					} else {
+						$wiki_domains[$part] = array('index' => $index, 'parts' => $domain_parts);
+					}
+					break;
+				}
 			}
 
-			$wikis_cache->set_many(array('short' => $short, 'long' => $long));
+			$wikis_cache->set_many(array('short' => $short, 'long' => $long, 'data' => $wiki_data,
+				'domains' => $wiki_domains));
 		}
 
-		var_dump($short);
-		echo '<br /><br /><br />';
-		var_dump($long);
-		echo '<br /><br /><br />';
-
-		$regex = '@[\[<]Include(.*?)[\]>]((.*?)[\[<]/Include.*?[\]>])?@i';
+		$regex = '@\[Include\-(.*?)\]((.*?)\[/Include.*?\])?@i';
 
 		$already_replaced = cache::make('filter_mediawiki', 'already_replaced');
 
@@ -62,16 +90,30 @@ class filter_mediawiki extends moodle_text_filter {
 			$ins_styles_wikimedia = false;
 
 			foreach( $matches as $match ) {
-				var_dump($match);
-				echo '<br /><br />';
-				/*$wv_lang = $match[1];
-				$title = $match[2];
+				if ( !empty($match[2]) ) {
+					$match_domains_parts = explode('/', strip_tags($match[2]));
+
+					$domain_parts = false;
+					foreach ( $match_domains_parts as $part ) {
+						$part = trim(strtolower($part));
+						if ( empty($part) || $part == 'http:' || $part == 'https:' ) continue;
+
+						if ( $domain_parts === false ) {
+							if ( !empty($wiki_domains[$part]) ) {
+								$domain_parts = $wiki_domains[$part];
+							} else {
+								print_error('db_delete_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
+								break;
+							}
+						}
+					}
+				}
 
 				if( !empty( $already_replaced[$wv_lang.$title] ) ) continue;
 
-				$url = 'https://' . $wv_lang . '.wikiversity.org/w/api.php?action=parse&format=php&prop=text&page=' . $title;
+				$url = $api_url.'?action=parse&format=php&prop=text&page=' . $title;
 
-				$curl = new curl( array( 'cache' => true, 'module_cache' => 'filter_wikiversity' ) );
+				$curl = new curl( array( 'cache' => true, 'module_cache' => 'filter_mediawiki' ) );
 
 				$page = $curl->get( $url );
 				$page = unserialize( $page );
@@ -97,7 +139,7 @@ class filter_mediawiki extends moodle_text_filter {
 
 				$text = str_replace( $match[0], $page, $text );
 
-				$already_replaced[$wv_lang.$title] = true;*/
+				$already_replaced[$wv_lang.$title] = true;
 			}
 
 			if ( $ins_styles_wikimedia ) {

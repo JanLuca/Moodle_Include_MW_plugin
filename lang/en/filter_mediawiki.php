@@ -33,6 +33,7 @@ $string['alreadyexists'] = 'The wiki with the short name "{$a->short}" and/or th
 $string['db_insert_error'] = 'Error when inserting new database record.';
 $string['db_delete_error'] = 'Error when deleting database record with id {$a}.';
 $string['db_update_error'] = 'Error when updating database record with id {$a}.';
+$string['unknowndomain'] = 'Your url {$a} to the wiki page is not enabled by your administrator.';
 
 // Caches
 $string['cachedef_wikis'] = 'Cache with the wikis that should be replaced';

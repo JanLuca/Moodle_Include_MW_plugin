@@ -375,21 +375,21 @@ function filter_mediawiki_submit_wiki($action = 'edit', $id = -1) {
 		}
 	}
 
-	$short_name = required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT);
+	$short_name = trim(required_param('filter_mediawiki_short', PARAM_ALPHANUMEXT));
 
 	if ( !empty($filter_mediawiki_submit_add_edit[$short_name]) ) {
 		return true;
 	}
 
-	$long_name = required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT);
+	$long_name = trim(required_param('filter_mediawiki_long', PARAM_ALPHANUMEXT));
 	$record = new stdClass();
 	$record->short_name = $short_name;
 	$record->long_name = $long_name;
-	$record->description = required_param('filter_mediawiki_description', PARAM_TEXT);
-	$record->lang = optional_param('filter_mediawiki_lang', '', PARAM_TEXT);
-	$record->api = required_param('filter_mediawiki_api', PARAM_TEXT);
-	$record->page_url = required_param('filter_mediawiki_page', PARAM_TEXT);
-	$record->type = required_param('filter_mediawiki_type', PARAM_ALPHANUMEXT);
+	$record->description = trim(required_param('filter_mediawiki_description', PARAM_TEXT));
+	$record->lang = trim(optional_param('filter_mediawiki_lang', '', PARAM_TEXT));
+	$record->api = trim(required_param('filter_mediawiki_api', PARAM_TEXT));
+	$record->page_url = trim(required_param('filter_mediawiki_page', PARAM_TEXT));
+	$record->type = trim(required_param('filter_mediawiki_type', PARAM_ALPHANUMEXT));
 
 	if ( $action == 'edit' ) {
 		if ( ($db_update = $DB->get_record('filter_mediawiki', array('id' => $id), 'id, short_name, long_name')) !== false ) {
