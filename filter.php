@@ -220,7 +220,7 @@ class filter_mediawiki extends moodle_text_filter {
 						}
 					}
 
-					if ( $add_to_title !== false ) {
+					if ( $add_to_title !== false && $add_to_title !== 1 ) {
 						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 						continue 2;
 					}
