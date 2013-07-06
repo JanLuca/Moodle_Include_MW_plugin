@@ -45,7 +45,7 @@ class filter_mediawiki extends moodle_text_filter {
 				$short_name = trim(strtolower($wiki->short_name));
 				$long_name = trim(strtolower($wiki->long_name));
 				$langs_str = trim(strtolower($wiki->lang));
-				$api = trim($wiki->api);
+				$api = trim(strtolower($wiki->api));
 				$page_url = trim(strtolower($wiki->page_url));
 				$type = trim(strtolower($wiki->type));
 
@@ -66,7 +66,7 @@ class filter_mediawiki extends moodle_text_filter {
 					if ( strpos($part, '$lang') !== false ) {
 						foreach ( $langs as $lang ) {
 							$domain = str_replace('$lang', $lang, $part);
-							$wiki_domains[$domain] = array('index' => $index, 'parts' => $domain_parts);
+							$wiki_domains[$domain] = array('index' => $index, 'parts' => $domain_parts, 'lang' => $lang);
 						}
 					} else {
 						$wiki_domains[$part] = array('index' => $index, 'parts' => $domain_parts);
@@ -81,56 +81,176 @@ class filter_mediawiki extends moodle_text_filter {
 
 		$regex = '@\[Include\-(.*?)\]((.*?)\[/Include.*?\])?@i';
 
-		$already_replaced = cache::make('filter_mediawiki', 'already_replaced');
-
 		$styles_wikimedia = '<link rel="stylesheet" href="https://bits.wikimedia.org/de.wikiversity.org/load.php?debug=false&amp;lang=de&amp;modules=ext.wikihiero%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmw.PopUpMediaTransform%7Cskins.vector&amp;only=styles&amp;skin=vector&amp;*" />';
 		$styles_wikimedia .= '<style type="text/css">.center{width: auto; text-align: left;} body {font-family: Arial,Verdana,Helvetica,sans-serif; font-size:13px;}</style>';
 
 		if ( preg_match_all( $regex, $text, $matches, PREG_SET_ORDER ) ) {
 			$ins_styles_wikimedia = false;
 
+			$already_replaced = cache::make('filter_mediawiki', 'already_replaced');
+			$curl = new curl( array( 'cache' => true, 'module_cache' => 'filter_mediawiki' ) );
+
 			foreach( $matches as $match ) {
+				$title = '';
+				$index = false;
+				$wiki_lang = '';
+
 				if ( !empty($match[2]) ) {
 					$match_domains_parts = explode('/', strip_tags($match[2]));
 
 					$domain_parts = false;
-					foreach ( $match_domains_parts as $part ) {
-						$part = trim(strtolower($part));
+					$page_title = null;
+					$add_to_title = false;
+					$i = 0;
+					foreach ( $match_domains_parts as $part_ori ) {
+						$part = trim(strtolower($part_ori));
+
+						if ( $add_to_title == 1 ) {
+							$title .= '/'.$part_ori;
+							continue;
+						} elseif ( $add_to_title == 2 ) {
+							$next = trim(strtolower($domain_parts['parts'][$i]));
+							if ( $part != $next ) {
+								$title .= '/'.$part_ori;
+								continue;
+							}
+						} elseif ( is_string($add_to_title) ) {
+							if ( ($pos_add_title = strpos($part, $add_to_title)) !== false ) {
+								if ( strlen($part) == strlen($part_ori) ) {
+									$title .= '/'.substr($part_ori, 0, $pos_add_title);
+								} else {
+									$needle = substr($part, $pos_add_title);
+									$pos_ori = stripos($part_ori, $needle);
+									$title .= '/'.substr($part_ori, 0, $pos_ori);
+								}
+							} else {
+								$title .= '/'.$part_ori;
+								continue;
+							}
+						}
+						$add_to_title = false;
+
 						if ( empty($part) || $part == 'http:' || $part == 'https:' ) continue;
 
 						if ( $domain_parts === false ) {
 							if ( !empty($wiki_domains[$part]) ) {
 								$domain_parts = $wiki_domains[$part];
+								$wiki_lang = $domain_parts['lang'];
 							} else {
-								print_error('db_delete_error', 'filter_mediawiki', '', format_text($id, FORMAT_HTML));
-								break;
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+								continue 2;
+							}
+						} else {
+							$next = trim(strtolower($domain_parts['parts'][$i]));
+							if ( $next == $part ) {
+								$i++;
+								continue;
+							} elseif ( ($pos = strpos($next, '$1')) !== false ) {
+								$len = strlen($next);
+								$len_domain_parts = count($domain_parts['parts']);
+								if ( $pos == 0 && $len == 2 ) {
+									$title = $part_ori;
+									$index = $domain_parts['index'];
+									if ( $len_domain_parts == ($i + 1) ) {
+										$add_to_title = 1;
+									} else {
+										$add_to_title = 2;
+									}
+								} elseif ( $pos == ($len - 2) ) {
+									$static = substr($part, 0, $pos);
+
+									if ( $static == substr($next, 0, $pos) ) {
+										$index = $domain_parts['index'];
+										if ( strlen($part) == strlen($part_ori) ) {
+											$title = substr($part_ori, $pos);
+											if ( $len_domain_parts == ($i + 1) ) {
+												$add_to_title = 1;
+											} else {
+												$add_to_title = 2;
+											}
+										} else {
+											$pos_ori = stripos($part_ori, substr($part, $pos));
+											$title = substr($part_ori, $pos_ori);
+											if ( $len_domain_parts == ($i + 1) ) {
+												$add_to_title = 1;
+											} else {
+												$add_to_title = 2;
+											}
+										}
+									} else {
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+										continue 2;
+									}
+								} else {
+									$before = substr($next, 0, $pos);
+									$after = substr($next, $pos + 2);
+
+									if ( strpos($part, $before) !== false ) {
+										if ( ($after_pos = strpos($part, $after)) !== false ) {
+											$index = $domain_parts['index'];
+											if ( strlen($part) == strlen($part_ori) ) {
+												$title = substr($part_ori, $pos, $after_pos - $pos);
+											} else {
+												$needle = substr($part, $pos, $after_pos - $pos);
+												$pos_ori = stripos($part_ori, $needle);
+												$title = substr($part_ori, $pos_ori, strlen($needle));
+											}
+										} else {
+											$index = $domain_parts['index'];
+											if ( strlen($part) == strlen($part_ori) ) {
+												$title = substr($part_ori, $pos);
+											} else {
+												$needle = substr($part, $pos);
+												$pos_ori = stripos($part_ori, $needle);
+												$title = substr($part_ori, $pos_ori);
+											}
+											$add_to_title = $after;
+										}
+									} else {
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+										continue 2;
+									}
+								}
+
+								$i++;
+							} else {
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+								continue 2;
 							}
 						}
 					}
+
+					if ( $add_to_title !== false ) {
+						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+						continue 2;
+					}
 				}
 
-				if( !empty( $already_replaced[$wv_lang.$title] ) ) continue;
+				if( $already_replaced->get($wiki_data[$index]['long'].$wiki_lang.$title) !== false ) continue;
 
-				$url = $api_url.'?action=parse&format=php&prop=text&page=' . $title;
-
-				$curl = new curl( array( 'cache' => true, 'module_cache' => 'filter_mediawiki' ) );
+				$url = $wiki_data[$index]['api'];
+				$url = str_replace( '$lang', $wiki_lang, $url );
+				$url = $url.'?action=parse&format=php&prop=text&page=' . $title;
 
 				$page = $curl->get( $url );
 				$page = unserialize( $page );
 
 				$page = $page['parse']['text']['*'];
 
-				$add_link = '<a href="https://' . $wv_lang . '.wikiversity.org/wiki/' . $title . '">https://' . $wv_lang . '.wikiversity.org/wiki/' . $title . '</a>';
-				$add = get_string( 'isfrom', 'filter_wikiversity', $add_link );
-				$add .= get_string( 'license', 'filter_wikiversity' );
+				$type_changes = false;
+				switch ( $wiki_data[$index]['type'] ) {
+					case 'wikimedia':
+						$type_changes = $this->type_changes_wikimedia($wiki_data[$index], $wiki_lang, $title);
+						$ins_styles_wikimedia = true;
+						break;
+					default:
+						//$type_changes = $this->type_changes_from_db($wiki_data[$index], $page);
+				}
 
-				$add_link = '<a href="https://' . $wv_lang . '.wikiversity.org/w/index.php?title=' . $title . '&action=history">';
-				$add .= get_string( 'authors', 'filter_wikiversity', $add_link );
-
-				$page .= '<hr />' . $add;
-
-				$page = str_replace( 'href="/wiki', 'href="https://' . $wv_lang . '.wikiversity.org/wiki', $page );
-				$page = str_replace( 'href="/w/', 'href="https://' . $wv_lang . '.wikiversity.org/w/', $page );
+				if ( $type_changes !== false ) {
+					$page .= html_writer::empty_tag('hr') . $type_changes['add'];
+					$page = str_replace( $type_changes['search'], $type_changes['replace'], $page );
+				}
 
 				if ( !$PAGE->user_is_editing() ) {
 					$regex_edit = '@\<span class=\"editsection\"\>\[.*?\]\<\/span\>@i';
@@ -139,7 +259,7 @@ class filter_mediawiki extends moodle_text_filter {
 
 				$text = str_replace( $match[0], $page, $text );
 
-				$already_replaced[$wv_lang.$title] = true;
+				$already_replaced->set($wiki_data[$index]['long'].$wiki_lang.$title, true);
 			}
 
 			if ( $ins_styles_wikimedia ) {
@@ -148,6 +268,29 @@ class filter_mediawiki extends moodle_text_filter {
 		}
 
 		return $text;
+	}
+
+	private function type_changes_wikimedia($data, $lang, $title) {
+		$page_url = $data['page'];
+		$page_url = str_replace('$lang', $lang, $page_url);
+		$page_url = str_replace('$1', $title, $page_url);
+		$page_link = html_writer::link($page_url, format_text($page_url, FORMAT_HTML));
+
+		$add = get_string( 'wikimedia_isfrom', 'filter_wikiversity', array('page_url' => $page_link,
+			'wiki_name' => format_text(ucfirst($data['long']), FORMAT_HTML));
+		$add .= get_string( 'wikimedia_license', 'filter_wikiversity' );
+
+		$history_link = '<a href="https://'.$lang.'.'.$data['long'].'.org/w/index.php?title='.$title.'&action=history">';
+		$add .= get_string( 'wikimedia_authors', 'filter_wikiversity', $history_link );
+
+		$search = array();
+		$replace = array();
+		$search[] = 'href="/wiki';
+		$replace[] = 'href="https://'.$lang.'.'.$data['long'].'.org/wiki';
+		$search[] = 'href="/w/';
+		$replace[] = 'href="https://'.$lang.'.'.$data['long'].'.org/w/';
+
+		return array('add' => $add, 'search' => $search, 'replace' => $replace);
 	}
 }
 ?>
