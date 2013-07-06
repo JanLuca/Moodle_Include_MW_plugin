@@ -95,8 +95,8 @@ class filter_mediawiki extends moodle_text_filter {
 				$index = false;
 				$wiki_lang = '';
 
-				if ( !empty($match[2]) ) {
-					$match_domains_parts = explode('/', strip_tags($match[2]));
+				if ( !empty($match[3]) ) {
+					$match_domains_parts = explode('/', strip_tags($match[3]));
 
 					$domain_parts = false;
 					$page_title = null;
@@ -137,7 +137,7 @@ class filter_mediawiki extends moodle_text_filter {
 								$domain_parts = $wiki_domains[$part];
 								$wiki_lang = $domain_parts['lang'];
 							} else {
-								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 								continue 2;
 							}
 						} else {
@@ -178,7 +178,7 @@ class filter_mediawiki extends moodle_text_filter {
 											}
 										}
 									} else {
-										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 										continue 2;
 									}
 								} else {
@@ -207,21 +207,21 @@ class filter_mediawiki extends moodle_text_filter {
 											$add_to_title = $after;
 										}
 									} else {
-										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 										continue 2;
 									}
 								}
 
 								$i++;
 							} else {
-								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 								continue 2;
 							}
 						}
 					}
 
 					if ( $add_to_title !== false ) {
-						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
+						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
 						continue 2;
 					}
 				}
