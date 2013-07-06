@@ -277,7 +277,7 @@ class filter_mediawiki extends moodle_text_filter {
 		$page_link = html_writer::link($page_url, format_text($page_url, FORMAT_HTML));
 
 		$add = get_string( 'wikimedia_isfrom', 'filter_wikiversity', array('page_url' => $page_link,
-			'wiki_name' => format_text(ucfirst($data['long']), FORMAT_HTML));
+			'wiki_name' => format_text(ucfirst($data['long']), FORMAT_HTML)) );
 		$add .= get_string( 'wikimedia_license', 'filter_wikiversity' );
 
 		$history_link = '<a href="https://'.$lang.'.'.$data['long'].'.org/w/index.php?title='.$title.'&action=history">';
