@@ -92,7 +92,7 @@ class filter_mediawiki extends moodle_text_filter {
 
 			foreach( $matches as $match ) {
 				$include_code = trim(strtolower($match[1]));
-				$title = '';
+				$title = false;
 				$index = false;
 				$wiki_lang = '';
 
@@ -227,6 +227,10 @@ class filter_mediawiki extends moodle_text_filter {
 					}
 				}
 
+				if ( $title === false || $index === false ) {
+					continue;
+				}
+
 				if( $already_replaced->get($wiki_data[$index]['long'].$wiki_lang.$title) !== false ) continue;
 
 				$url = $wiki_data[$index]['api'];
@@ -275,6 +279,9 @@ class filter_mediawiki extends moodle_text_filter {
 		$page_url = $data['page'];
 		$page_url = str_replace('$lang', $lang, $page_url);
 		$page_url = str_replace('$1', $title, $page_url);
+		if ( strpos($page_url, '//') == 0 ) {
+			$page_url = 'https:' . $page_url;
+		}
 		$page_link = html_writer::link($page_url, format_text($page_url, FORMAT_HTML));
 
 		$add = get_string( 'wikimedia_isfrom', 'filter_mediawiki', array('page_link' => $page_link,
