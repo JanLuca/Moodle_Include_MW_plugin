@@ -79,7 +79,7 @@ class filter_mediawiki extends moodle_text_filter {
 				'domains' => $wiki_domains));
 		}
 
-		$regex = '@\[Include\-(.*?)\]((.*?)\[/Include.*?\])@i';
+		$regex = '@\[Include\-(.*?)\s*\](.*?)\[/Include.*?\]@i';
 
 		$styles_wikimedia = '<link rel="stylesheet" href="https://bits.wikimedia.org/de.wikiversity.org/load.php?debug=false&amp;lang=de&amp;modules=ext.wikihiero%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmw.PopUpMediaTransform%7Cskins.vector&amp;only=styles&amp;skin=vector&amp;*" />';
 		$styles_wikimedia .= '<style type="text/css">.center{width: auto; text-align: left;} body {font-family: Arial,Verdana,Helvetica,sans-serif; font-size:13px;}</style>';
@@ -96,8 +96,8 @@ class filter_mediawiki extends moodle_text_filter {
 				$index = false;
 				$wiki_lang = '';
 
-				if ( !empty($match[3]) && $include_code == 'mw' ) {
-					$match_domains_parts = explode('/', strip_tags($match[3]));
+				if ( !empty($match[2]) && $include_code == 'mw' ) {
+					$match_domains_parts = explode('/', strip_tags($match[2]));
 
 					$domain_parts = false;
 					$page_title = null;
@@ -138,7 +138,7 @@ class filter_mediawiki extends moodle_text_filter {
 								$domain_parts = $wiki_domains[$part];
 								$wiki_lang = $domain_parts['lang'];
 							} else {
-								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
 								continue 2;
 							}
 						} else {
@@ -179,7 +179,7 @@ class filter_mediawiki extends moodle_text_filter {
 											}
 										}
 									} else {
-										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
 										continue 2;
 									}
 								} else {
@@ -208,21 +208,21 @@ class filter_mediawiki extends moodle_text_filter {
 											$add_to_title = $after;
 										}
 									} else {
-										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
+										print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
 										continue 2;
 									}
 								}
 
 								$i++;
 							} else {
-								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
+								print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
 								continue 2;
 							}
 						}
 					}
 
 					if ( $add_to_title !== false && $add_to_title !== 1 ) {
-						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[3], FORMAT_HTML));
+						print_error('unknowndomain', 'filter_mediawiki', '', format_text($match[2], FORMAT_HTML));
 						continue 2;
 					}
 				}
