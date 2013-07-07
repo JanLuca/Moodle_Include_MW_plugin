@@ -79,7 +79,7 @@ class filter_mediawiki extends moodle_text_filter {
 				'domains' => $wiki_domains));
 		}
 
-		$regex = '@\[Include\-(.*?)\]((.*?)\[/Include.*?\])?@i';
+		$regex = '@\[Include\-(.*?)\]((.*?)\[/Include.*?\])@i';
 
 		$styles_wikimedia = '<link rel="stylesheet" href="https://bits.wikimedia.org/de.wikiversity.org/load.php?debug=false&amp;lang=de&amp;modules=ext.wikihiero%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmw.PopUpMediaTransform%7Cskins.vector&amp;only=styles&amp;skin=vector&amp;*" />';
 		$styles_wikimedia .= '<style type="text/css">.center{width: auto; text-align: left;} body {font-family: Arial,Verdana,Helvetica,sans-serif; font-size:13px;}</style>';
@@ -91,11 +91,12 @@ class filter_mediawiki extends moodle_text_filter {
 			$curl = new curl( array( 'cache' => true, 'module_cache' => 'filter_mediawiki' ) );
 
 			foreach( $matches as $match ) {
+				$include_code = trim(strtolower($match[1]));
 				$title = '';
 				$index = false;
 				$wiki_lang = '';
 
-				if ( !empty($match[3]) ) {
+				if ( !empty($match[3]) && $include_code == 'mw' ) {
 					$match_domains_parts = explode('/', strip_tags($match[3]));
 
 					$domain_parts = false;
